@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import COLORS from './Theme';
 
 const givingOptions = [
   {
@@ -37,29 +38,29 @@ const GivingScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0F24' }}>
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Support the Ministry</Text>
-      <Text style={styles.subtext}>
-        Your giving helps us spread the Gospel and serve our community.
-      </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.header}>Support the Ministry</Text>
+        <Text style={styles.subtext}>
+          Your giving helps us spread the Gospel and serve our community.
+        </Text>
 
-      {givingOptions.map((option) => (
-        <View key={option.id} style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Ionicons name="heart-outline" size={22} color="#fff" />
-            <Text style={styles.title}>{option.title}</Text>
+        {givingOptions.map((option) => (
+          <View key={option.id} style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="heart-outline" size={22} color={COLORS.text} />
+              <Text style={styles.title}>{option.title}</Text>
+            </View>
+            <Text style={styles.description}>{option.description}</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleGiveNow(option.title)}
+            >
+              <Text style={styles.buttonText}>Give Now</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.description}>{option.description}</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleGiveNow(option.title)}
-          >
-            <Text style={styles.buttonText}>Give Now</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-    </ScrollView>
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -67,22 +68,22 @@ const GivingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0F24',
+    backgroundColor: COLORS.background,
     padding: 16,
   },
   header: {
     fontSize: 24,
-    color: '#fff',
+    color: COLORS.text,
     fontWeight: '700',
     marginBottom: 8,
   },
   subtext: {
     fontSize: 14,
-    color: '#ccc',
+    color: '#666',
     marginBottom: 20,
   },
   card: {
-    backgroundColor: '#1C223C',
+    backgroundColor: COLORS.card,
     borderRadius: 10,
     padding: 16,
     marginBottom: 16,
@@ -94,16 +95,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    color: '#fff',
+    color: COLORS.text,
     fontWeight: '600',
     marginLeft: 8,
   },
   description: {
-    color: '#bbb',
+    color: COLORS.text,
     marginBottom: 12,
   },
   button: {
-    backgroundColor: '#4263EB',
+    backgroundColor: '#000000',
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',

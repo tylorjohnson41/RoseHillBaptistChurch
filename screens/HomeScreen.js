@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import COLORS from './Theme';
 
 export default function HomeScreen({ navigation }) {
   const [avatarURL, setAvatarURL] = useState(null);
@@ -49,12 +50,10 @@ export default function HomeScreen({ navigation }) {
     };
 
     fetchUser();
-  }, []);  
-
-
+  }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0D2B45' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
           <View>
@@ -63,7 +62,7 @@ export default function HomeScreen({ navigation }) {
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
             <Image
-              source={require('../assets/Portrait_Placeholder.png')} // this is a placeholder image
+              source={require('../assets/Portrait_Placeholder.png')}
               style={styles.avatar}
             />
           </TouchableOpacity>
@@ -71,31 +70,31 @@ export default function HomeScreen({ navigation }) {
 
         <Text style={styles.sectionLabel}>SUNDAY SERVICES</Text>
         <View style={styles.videoBox}>
-          <Ionicons name="play-circle-outline" size={64} color="#fff" />
+          <Ionicons name="play-circle-outline" size={64} color={COLORS.text} />
         </View>
 
         <View style={styles.iconRow}>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="play-circle-outline" size={24} color="#fff" />
+            <Ionicons name="play-circle-outline" size={24} color={COLORS.text} />
             <Text style={styles.iconLabel}>Sermons</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="calendar-outline" size={24} color="#fff" />
+            <Ionicons name="calendar-outline" size={24} color={COLORS.text} />
             <Text style={styles.iconLabel}>Events</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="book-outline" size={24} color="#fff" />
+            <Ionicons name="book-outline" size={24} color={COLORS.text} />
             <Text style={styles.iconLabel}>Bible</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="heart-outline" size={24} color="#fff" />
+            <Ionicons name="heart-outline" size={24} color={COLORS.text} />
             <Text style={styles.iconLabel}>Give</Text>
           </TouchableOpacity>
         </View>
 
         <Text style={styles.sectionLabel}>Latest Sermon</Text>
         <View style={styles.sermonBox}>
-          <Text style={styles.sermonText}>“Faith Over Fear” - Pastor Johnson</Text>
+          <Text style={styles.sermonText}>Faith Over Fear - Pastor Johnson</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -105,6 +104,7 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    backgroundColor: COLORS.background,
   },
   headerRow: {
     flexDirection: 'row',
@@ -113,13 +113,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   appName: {
-    color: '#fff',
+    color: COLORS.text,
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 2,
   },
   welcome: {
-    color: '#fff',
+    color: COLORS.text,
     fontSize: 28,
     fontWeight: 'bold',
   },
@@ -128,17 +128,17 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: COLORS.accent,
   },
   sectionLabel: {
-    color: '#fff',
+    color: COLORS.text,
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
   },
   videoBox: {
     height: 160,
-    backgroundColor: '#143554',
+    backgroundColor: COLORS.card,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -154,17 +154,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconLabel: {
-    color: '#fff',
+    color: COLORS.text,
     marginTop: 6,
     fontSize: 12,
   },
   sermonBox: {
-    backgroundColor: '#143554',
+    backgroundColor: COLORS.card,
     borderRadius: 10,
     padding: 16,
   },
   sermonText: {
-    color: '#fff',
+    color: COLORS.text,
     fontSize: 14,
   },
 });
