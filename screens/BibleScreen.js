@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
+import DropDownPicker from 'react-native-dropdown-picker';
 import COLORS from './Theme';
 
 const oldTestament = ['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi'];
@@ -26,13 +27,20 @@ const BibleScreen = () => {
   const [fontSize, setFontSize] = useState(16);
   const [search, setSearch] = useState('');
 
+  // Bible version dropdown state
+  const [open, setOpen] = useState(false);
+  const [version, setVersion] = useState('kjv');
+  const [versions] = useState([
+    { label: 'King James (KJV)', value: 'kjv' },
+  ]);
+
   const books = testament === 'Old' ? oldTestament : newTestament;
 
   const fetchChapter = async () => {
     if (!selectedBook || !selectedChapter) return;
     setLoading(true);
     try {
-      const response = await fetch(`https://bible-api.com/${selectedBook}+${selectedChapter}`);
+      const response = await fetch(`https://bible-api.com/${selectedBook}+${selectedChapter}?translation=${version}`);
       const data = await response.json();
       setVerses(data.verses || []);
     } catch {
@@ -43,13 +51,13 @@ const BibleScreen = () => {
 
   useEffect(() => {
     fetchChapter();
-  }, [selectedBook, selectedChapter]);
+  }, [selectedBook, selectedChapter, version]);
 
   const handleSearch = async () => {
     if (!search.trim()) return;
     setLoading(true);
     try {
-      const response = await fetch(`https://bible-api.com/${encodeURIComponent(search)}`);
+      const response = await fetch(`https://bible-api.com/${encodeURIComponent(search)}?translation=${version}`);
       const data = await response.json();
       if (data.reference) {
         const [book, chapter] = data.reference.split(' ');
@@ -68,6 +76,9 @@ const BibleScreen = () => {
     setSearch('');
   };
 
+  const nextChapter = () => setSelectedChapter((prev) => prev + 1);
+  const prevChapter = () => setSelectedChapter((prev) => (prev > 1 ? prev - 1 : 1));
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -78,6 +89,7 @@ const BibleScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Suggested Reading */}
         {!selectedBook && (
           <View style={[styles.suggestedBox, { backgroundColor: COLORS.card }]}>
             <Text style={[styles.suggestedLabel, { color: COLORS.text }]}>Today's Suggested Reading</Text>
@@ -85,6 +97,7 @@ const BibleScreen = () => {
           </View>
         )}
 
+        {/* Search */}
         <View style={[styles.searchContainer, { backgroundColor: COLORS.card }]}>
           <TextInput
             style={[styles.searchBar, { color: COLORS.text }]}
@@ -99,31 +112,46 @@ const BibleScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Testament toggle */}
         <View style={styles.toggleRow}>
-          <TouchableOpacity
-            style={[styles.toggleButton, testament === 'Old' && styles.toggleActive]}
-            onPress={() => setTestament('Old')}
-          >
-            <Text style={[styles.toggleText, testament === 'Old' && styles.toggleTextActive]}>Old Testament</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleButton, testament === 'New' && styles.toggleActive]}
-            onPress={() => setTestament('New')}
-          >
-            <Text style={[styles.toggleText, testament === 'New' && styles.toggleTextActive]}>New Testament</Text>
-          </TouchableOpacity>
+          {['Old', 'New'].map((t) => (
+            <TouchableOpacity
+              key={t}
+              style={[styles.toggleButton, testament === t && styles.toggleActive]}
+              onPress={() => setTestament(t)}
+            >
+              <Text style={[styles.toggleText, testament === t && styles.toggleTextActive]}>{t} Testament</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
+        {/* Font controls */}
         <View style={styles.fontControls}>
-          <TouchableOpacity onPress={() => setFontSize(f => Math.max(12, f - 2))}>
+          <TouchableOpacity onPress={() => setFontSize((f) => Math.max(12, f - 2))}>
             <Ionicons name="remove-circle-outline" size={20} color={COLORS.text} />
           </TouchableOpacity>
           <Text style={{ color: COLORS.text }}>Font Size</Text>
-          <TouchableOpacity onPress={() => setFontSize(f => f + 2)}>
+          <TouchableOpacity onPress={() => setFontSize((f) => f + 2)}>
             <Ionicons name="add-circle-outline" size={20} color={COLORS.text} />
           </TouchableOpacity>
         </View>
 
+        {/* Bible Version Dropdown */}
+        <View style={{ marginBottom: open ? 200 : 20 }}>
+          <DropDownPicker
+            open={open}
+            value={version}
+            items={versions}
+            setOpen={setOpen}
+            setValue={setVersion}
+            setItems={() => {}}
+            style={{ backgroundColor: COLORS.card, borderColor: '#ccc' }}
+            dropDownContainerStyle={{ backgroundColor: COLORS.card }}
+            textStyle={{ color: COLORS.text }}
+          />
+        </View>
+
+        {/* Book tiles */}
         {!selectedBook && (
           <View style={styles.tileGrid}>
             {books.map((book, i) => (
@@ -138,6 +166,7 @@ const BibleScreen = () => {
           </View>
         )}
 
+        {/* Chapter selection */}
         {selectedBook && selectedChapter === null && (
           <>
             <View style={styles.clearRow}>
@@ -160,6 +189,7 @@ const BibleScreen = () => {
           </>
         )}
 
+        {/* Bible reading view */}
         {selectedChapter && (
           <>
             <View style={styles.clearRow}>
@@ -168,15 +198,30 @@ const BibleScreen = () => {
                 <Ionicons name="close-circle" size={24} color={COLORS.text} />
               </TouchableOpacity>
             </View>
+            <View style={styles.chapterNav}>
+              <TouchableOpacity onPress={prevChapter}><Text style={{ color: COLORS.text }}>Previous</Text></TouchableOpacity>
+              <Text style={{ color: COLORS.text }}>Chapter {selectedChapter}</Text>
+              <TouchableOpacity onPress={nextChapter}><Text style={{ color: COLORS.text }}>Next</Text></TouchableOpacity>
+            </View>
             {loading ? (
               <ActivityIndicator size="large" color={COLORS.text} />
             ) : (
               <View style={[styles.readerBox, { backgroundColor: COLORS.card }]}>
                 {verses.map((verse) => (
-                  <Text key={verse.verse} style={{ color: COLORS.text, fontSize, marginBottom: 8 }}>
-                    <Text style={{ fontWeight: 'bold' }}>{verse.verse} </Text>
-                    {verse.text}
-                  </Text>
+                  <View key={verse.verse} style={styles.verseRow}>
+                    <Text style={{ color: COLORS.text, fontSize }}>
+                      <Text style={{ fontWeight: 'bold' }}>{verse.verse} </Text>
+                      {verse.text}
+                    </Text>
+                    <View style={styles.verseIcons}>
+                      <TouchableOpacity onPress={() => Clipboard.setStringAsync(verse.text)}>
+                        <Ionicons name="copy-outline" size={20} color={COLORS.text} />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => Share.share({ message: verse.text })}>
+                        <Ionicons name="share-social-outline" size={20} color={COLORS.text} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 ))}
               </View>
             )}
@@ -189,7 +234,7 @@ const BibleScreen = () => {
 
 const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
-  header: { fontSize: 28, fontWeight: 'bold', color: COLORS.text },
+  header: { fontSize: 28, fontWeight: 'bold' },
   suggestedBox: { padding: 12, borderRadius: 10, marginBottom: 16 },
   suggestedLabel: { fontWeight: '600' },
   suggestedText: { fontStyle: 'italic' },
@@ -209,7 +254,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   toggleActive: { backgroundColor: COLORS.accent },
-  toggleText: { color: '#000000' },
+  toggleText: { color: '#555' },
   toggleTextActive: { color: '#fff', fontWeight: '600' },
   fontControls: {
     flexDirection: 'row',
@@ -241,7 +286,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  chapterNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
   readerBox: { padding: 16, borderRadius: 10 },
+  verseRow: { marginBottom: 12 },
+  verseIcons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4,
+  },
 });
 
 export default BibleScreen;
