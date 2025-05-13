@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { use } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,37 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { supabase } from '../lib/supabase';
 
 export default function HomeScreen({ navigation }) {
+  const [avatarURL, setAvatarURL] = React.useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (user) {
+        const {data: {user} } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id, user.id')
+        .single();
+
+        if (data?.avatar_url) {
+          setAvatarURL(data.avatar_url);
+      }
+        console.error('Error fetching user:', error);
+        return;
+      }
+      if (data.user) {
+        const { user_metadata } = data.user;
+        if (user_metadata && user_metadata.avatar_url) {
+          setAvatarURL(user_metadata.avatar_url);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, []);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D2B45' }}>
       <ScrollView contentContainerStyle={styles.container}>
