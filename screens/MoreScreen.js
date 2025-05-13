@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const MoreScreen = ({ navigation }) => {
   const handlePress = (label) => {
@@ -27,7 +28,7 @@ const MoreScreen = ({ navigation }) => {
         Linking.openURL('https://yourchurch.org/newsletter');
         break;
       case 'Facebook':
-        Linking.openURL('https://facebook.com/yourchurch');
+        Linking.openURL('https://www.facebook.com/share/16TJWrXR1a/?mibextid=wwXIfr');
         break;
       case 'Settings':
         Alert.alert('Settings', 'This could toggle dark mode or app preferences.');
@@ -47,7 +48,8 @@ const MoreScreen = ({ navigation }) => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0F24'}}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>More</Text>
       {items.map((item, index) => (
         <TouchableOpacity
@@ -60,6 +62,7 @@ const MoreScreen = ({ navigation }) => {
         </TouchableOpacity>
       ))}
     </ScrollView>
+    </SafeAreaView>
   );
 };
 

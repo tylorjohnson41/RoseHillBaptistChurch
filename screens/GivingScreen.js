@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const givingOptions = [
   {
@@ -36,6 +37,7 @@ const GivingScreen = () => {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0F24' }}>
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Support the Ministry</Text>
       <Text style={styles.subtext}>
@@ -58,6 +60,7 @@ const GivingScreen = () => {
         </View>
       ))}
     </ScrollView>
+    </SafeAreaView>
   );
 };
 

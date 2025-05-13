@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 const categories = ['All', 'Youth', 'Bible Study', 'Outreach'];
@@ -75,7 +76,9 @@ const EventsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={{ flex: 1,  backgroundColor: '#0A0F24'}}>
+    <ScrollView contentContainerStyle={styles.container}>
+  
       <Text style={styles.header}>Church Events</Text>
 
       {/* Toggle Tabs */}
@@ -199,6 +202,7 @@ const EventsScreen = () => {
         </View>
       </Modal>
     </ScrollView>
+    </SafeAreaView>
   );
 };
 
