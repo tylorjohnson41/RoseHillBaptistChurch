@@ -1,70 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
-  ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+
+const oldTestament = [
+  'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
+  'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel',
+  '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra',
+  'Nehemiah', 'Esther', 'Job', 'Psalms', 'Proverbs',
+  'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations',
+  'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos',
+  'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk',
+  'Zephaniah', 'Haggai', 'Zechariah', 'Malachi'
+];
+
+const newTestament = [
+  'Matthew', 'Mark', 'Luke', 'John', 'Acts',
+  'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians',
+  'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians', '1 Timothy',
+  '2 Timothy', 'Titus', 'Philemon', 'Hebrews', 'James',
+  '1 Peter', '2 Peter', '1 John', '2 John', '3 John',
+  'Jude', 'Revelation'
+];
 
 const BibleScreen = () => {
   const [search, setSearch] = useState('');
-  const [selectedBook, setSelectedBook] = useState('');
-  const [selectedChapter, setSelectedChapter] = useState('');
-  const [verses, setVerses] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  const books = ['Genesis', 'Exodus', 'John', 'Matthew', 'Psalms'];
-
-  useEffect(() => {
-    if (selectedBook && selectedChapter) {
-      fetchChapter();
-    }
-  }, [selectedBook, selectedChapter]);
-
-  const fetchChapter = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`https://bible-api.com/${selectedBook}+${selectedChapter}`);
-      const data = await response.json();
-      if (data.verses) {
-        setVerses(data.verses);
-      } else {
-        setVerses([]);
-      }
-    } catch (error) {
-      console.error('Error fetching Bible text:', error);
-      setVerses([]);
-    }
-    setLoading(false);
-  };
-
-  const clearSelection = () => {
-    setSelectedBook('');
-    setSelectedChapter('');
-    setVerses([]);
-  };
+  const renderTiles = (books) => (
+    <View style={styles.tileGrid}>
+      {books.map((book) => (
+        <TouchableOpacity key={book} style={styles.tile}>
+          <Text style={styles.tileText}>{book}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0F24' }}>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.header}>Bible</Text>
 
-        {!selectedBook && (
-          <>
-            <Text style={styles.sectionTitle}>Verse of the Day</Text>
-            <View style={styles.verseBox}>
-              <Text style={styles.verseText}>
-                "Your word is a lamp to my feet and a light to my path." - Psalm 119:105
-              </Text>
-            </View>
-          </>
-        )}
+        {/* Verse of the Day */}
+        <View style={styles.verseBox}>
+          <Text style={styles.verseLabel}>Verse of the Day</Text>
+          <Text style={styles.verseText}>
+            "Your word is a lamp to my feet and a light to my path." - Psalm 119:105
+          </Text>
+        </View>
 
+        {/* Search */}
         <TextInput
           placeholder="Search a verse (e.g. John 3:16)"
           placeholderTextColor="#aaa"
@@ -73,76 +64,24 @@ const BibleScreen = () => {
           onChangeText={setSearch}
         />
 
-        {!selectedBook && (
-          <>
-            <Text style={styles.sectionTitle}>Books of the Bible</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {books.map((book) => (
-                <TouchableOpacity
-                  key={book}
-                  style={styles.bookButton}
-                  onPress={() => setSelectedBook(book)}
-                >
-                  <Text style={styles.bookText}>{book}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </>
-        )}
+        {/* Old Testament */}
+        <Text style={styles.sectionTitle}>Old Testament</Text>
+        {renderTiles(oldTestament)}
 
-        {selectedBook && !selectedChapter && (
-          <>
-            <View style={styles.clearRow}>
-              <Text style={styles.sectionTitle}>Select a Chapter - {selectedBook}</Text>
-              <TouchableOpacity onPress={clearSelection}>
-                <Ionicons name="close-circle" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.chapterList}>
-              {[...Array(10).keys()].map((i) => (
-                <TouchableOpacity
-                  key={i + 1}
-                  style={styles.chapterButton}
-                  onPress={() => setSelectedChapter(i + 1)}
-                >
-                  <Text style={styles.chapterText}>{i + 1}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </>
-        )}
+        {/* New Testament */}
+        <Text style={styles.sectionTitle}>New Testament</Text>
+        {renderTiles(newTestament)}
 
-        {selectedBook && selectedChapter && (
-          <>
-            <View style={styles.clearRow}>
-              <Text style={styles.sectionTitle}>
-                {selectedBook} {selectedChapter}
-              </Text>
-              <TouchableOpacity onPress={clearSelection}>
-                <Ionicons name="close-circle" size={24} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            {loading ? (
-              <ActivityIndicator color="#fff" size="large" style={{ marginTop: 20 }} />
-            ) : (
-              <View style={styles.readerBox}>
-                {verses.map((verse) => (
-                  <Text key={verse.verse} style={styles.readerText}>
-                    <Text style={styles.verseNumber}>{verse.verse} </Text>
-                    {verse.text.trim()}
-                  </Text>
-                ))}
-              </View>
-            )}
-          </>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 16 },
+  container: {
+    padding: 16,
+    paddingBottom: 40,
+  },
   header: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -150,67 +89,55 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+  verseBox: {
+    backgroundColor: '#1C223C',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  verseLabel: {
     color: '#fff',
-    marginBottom: 10,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  verseText: {
+    color: '#ccc',
+    fontStyle: 'italic',
   },
   searchBar: {
     backgroundColor: '#1C223C',
     padding: 12,
     borderRadius: 10,
     color: '#fff',
-    marginBottom: 20,
+    marginBottom: 24,
   },
-  verseBox: {
-    backgroundColor: '#1C223C',
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 20,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 12,
+    marginTop: 8,
   },
-  verseText: { color: '#ccc', fontStyle: 'italic' },
-  bookButton: {
-    backgroundColor: '#1C223C',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  bookText: { color: '#fff' },
-  chapterList: {
+  tileGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 20,
-  },
-  chapterButton: {
-    backgroundColor: '#4263EB',
-    padding: 10,
-    borderRadius: 6,
-    margin: 4,
-  },
-  chapterText: { color: '#fff' },
-  clearRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    gap: 12,
+    marginBottom: 24,
   },
-  readerBox: {
-    backgroundColor: '#1C223C',
-    padding: 16,
+  tile: {
+    width: '47%',
+    backgroundColor: '#283046',
+    paddingVertical: 14,
     borderRadius: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  readerText: {
+  tileText: {
     color: '#fff',
-    lineHeight: 26,
-    marginBottom: 8,
-    fontSize: 16,
-  },
-  verseNumber: {
-    fontWeight: 'bold',
-    color: '#9baaf7',
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });
 
