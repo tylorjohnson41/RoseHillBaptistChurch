@@ -6,6 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Animated,
+  Modal,
+  TextInput,
+  Alert,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +23,7 @@ const allEvents = [
     time: '6:00 PM',
     location: 'Sanctuary',
     category: 'Youth',
-    addedBy: 'me', // placeholder logic
+    addedBy: 'me',
   },
   {
     id: 2,
@@ -44,6 +47,14 @@ const EventsScreen = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedTab, setSelectedTab] = useState('All');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    kids: '',
+  });
 
   const filteredEvents = allEvents.filter((event) => {
     const matchesDate = selectedDate ? event.date === selectedDate : true;
@@ -54,8 +65,14 @@ const EventsScreen = () => {
 
   const eventsToDisplay =
     selectedTab === 'My'
-      ? filteredEvents.filter((e) => e.addedBy === 'me') // Placeholder for real user logic
+      ? filteredEvents.filter((e) => e.addedBy === 'me')
       : filteredEvents;
+
+  const handleRegister = () => {
+    setModalVisible(false);
+    Alert.alert('Registered', `You registered for ${selectedEvent?.title}`);
+    setForm({ name: '', email: '', phone: '', kids: '' });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -106,18 +123,10 @@ const EventsScreen = () => {
         {categories.map((cat) => (
           <TouchableOpacity
             key={cat}
-            style={[
-              styles.filterButton,
-              selectedCategory === cat && styles.activeFilter,
-            ]}
+            style={[styles.filterButton, selectedCategory === cat && styles.activeFilter]}
             onPress={() => setSelectedCategory(cat)}
           >
-            <Text
-              style={[
-                styles.filterText,
-                selectedCategory === cat && styles.activeFilterText,
-              ]}
-            >
+            <Text style={[styles.filterText, selectedCategory === cat && styles.activeFilterText]}>
               {cat}
             </Text>
           </TouchableOpacity>
@@ -137,6 +146,15 @@ const EventsScreen = () => {
             </Text>
             <Text style={styles.detail}>Location: {event.location}</Text>
             <Text style={styles.category}>{event.category}</Text>
+            <TouchableOpacity
+              style={styles.interestButton}
+              onPress={() => {
+                setSelectedEvent(event);
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.interestText}>Interested?</Text>
+            </TouchableOpacity>
           </Animated.View>
         ))
       ) : (
@@ -155,22 +173,38 @@ const EventsScreen = () => {
           <Text style={styles.clearButtonText}>Clear Selection</Text>
         </TouchableOpacity>
       )}
+
+      {/* Modal */}
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalHeader}>Register for {selectedEvent?.title}</Text>
+            {['name', 'email', 'phone', 'kids'].map((field) => (
+              <TextInput
+                key={field}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                placeholderTextColor="#aaa"
+                style={styles.input}
+                value={form[field]}
+                onChangeText={(text) => setForm((prev) => ({ ...prev, [field]: text }))}
+              />
+            ))}
+            <TouchableOpacity style={styles.submitButton} onPress={handleRegister}>
+              <Text style={styles.submitText}>Submit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={{ color: '#fff', marginTop: 12, textAlign: 'center' }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0A0F24',
-    padding: 16,
-  },
-  header: {
-    fontSize: 24,
-    color: '#fff',
-    fontWeight: '700',
-    marginBottom: 12,
-  },
+  container: { flex: 1, backgroundColor: '#0A0F24', padding: 16 },
+  header: { fontSize: 24, color: '#fff', fontWeight: '700', marginBottom: 12 },
   tabToggle: {
     flexDirection: 'row',
     alignSelf: 'center',
@@ -179,25 +213,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     overflow: 'hidden',
   },
-  tabButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-  },
-  tabText: {
-    color: '#aaa',
-    fontWeight: '500',
-  },
-  activeTab: {
-    backgroundColor: '#4263EB',
-  },
-  activeTabText: {
-    color: '#fff',
-  },
-  calendar: {
-    marginBottom: 20,
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
+  tabButton: { paddingVertical: 8, paddingHorizontal: 20 },
+  tabText: { color: '#aaa', fontWeight: '500' },
+  activeTab: { backgroundColor: '#4263EB' },
+  activeTabText: { color: '#fff' },
+  calendar: { marginBottom: 20, borderRadius: 10, overflow: 'hidden' },
   filters: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -210,48 +230,33 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#1C223C',
   },
-  activeFilter: {
-    backgroundColor: '#4263EB',
-  },
-  filterText: {
-    color: '#ccc',
-    fontWeight: '500',
-  },
-  activeFilterText: {
-    color: '#fff',
-  },
+  activeFilter: { backgroundColor: '#4263EB' },
+  filterText: { color: '#ccc', fontWeight: '500' },
+  activeFilterText: { color: '#fff' },
   card: {
     backgroundColor: '#1C223C',
     borderRadius: 10,
     padding: 16,
     marginBottom: 16,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  detail: {
-    color: '#ccc',
-    marginBottom: 4,
-  },
-  category: {
-    color: '#9baaf7',
-    fontStyle: 'italic',
-    marginTop: 4,
-  },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  title: { fontSize: 18, color: '#fff', fontWeight: '600', marginLeft: 8 },
+  detail: { color: '#ccc', marginBottom: 4 },
+  category: { color: '#9baaf7', fontStyle: 'italic', marginTop: 4 },
   noEvents: {
     color: '#aaa',
     fontStyle: 'italic',
     textAlign: 'center',
     marginTop: 20,
   },
+  interestButton: {
+    marginTop: 10,
+    backgroundColor: '#4263EB',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  interestText: { color: '#fff', fontWeight: '600' },
   clearButton: {
     marginTop: 16,
     padding: 10,
@@ -259,10 +264,34 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  clearButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+  clearButtonText: { color: '#fff', fontWeight: '600' },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 20,
   },
+  modalContainer: {
+    backgroundColor: '#1C223C',
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalHeader: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  input: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 10,
+    color: '#fff',
+    marginBottom: 10,
+  },
+  submitButton: {
+    backgroundColor: '#4263EB',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitText: { color: '#fff', fontWeight: '600' },
 });
 
 export default EventsScreen;
