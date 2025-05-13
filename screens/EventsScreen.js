@@ -20,6 +20,7 @@ const allEvents = [
     time: '6:00 PM',
     location: 'Sanctuary',
     category: 'Youth',
+    addedBy: 'me', // placeholder logic
   },
   {
     id: 2,
@@ -42,16 +43,43 @@ const allEvents = [
 const EventsScreen = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedTab, setSelectedTab] = useState('All');
 
   const filteredEvents = allEvents.filter((event) => {
     const matchesDate = selectedDate ? event.date === selectedDate : true;
-    const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === 'All' || event.category === selectedCategory;
     return matchesDate && matchesCategory;
   });
+
+  const eventsToDisplay =
+    selectedTab === 'My'
+      ? filteredEvents.filter((e) => e.addedBy === 'me') // Placeholder for real user logic
+      : filteredEvents;
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Church Events</Text>
+
+      {/* Toggle Tabs */}
+      <View style={styles.tabToggle}>
+        <TouchableOpacity
+          style={[styles.tabButton, selectedTab === 'All' && styles.activeTab]}
+          onPress={() => setSelectedTab('All')}
+        >
+          <Text style={[styles.tabText, selectedTab === 'All' && styles.activeTabText]}>
+            All Events
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, selectedTab === 'My' && styles.activeTab]}
+          onPress={() => setSelectedTab('My')}
+        >
+          <Text style={[styles.tabText, selectedTab === 'My' && styles.activeTabText]}>
+            My Events
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Calendar */}
       <Calendar
@@ -97,8 +125,8 @@ const EventsScreen = () => {
       </View>
 
       {/* Event Cards */}
-      {filteredEvents.length > 0 ? (
-        filteredEvents.map((event) => (
+      {eventsToDisplay.length > 0 ? (
+        eventsToDisplay.map((event) => (
           <Animated.View key={event.id} style={styles.card}>
             <View style={styles.cardHeader}>
               <Ionicons name="calendar-outline" size={20} color="#fff" />
@@ -142,6 +170,28 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     marginBottom: 12,
+  },
+  tabToggle: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    backgroundColor: '#1C223C',
+    borderRadius: 10,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+  },
+  tabText: {
+    color: '#aaa',
+    fontWeight: '500',
+  },
+  activeTab: {
+    backgroundColor: '#4263EB',
+  },
+  activeTabText: {
+    color: '#fff',
   },
   calendar: {
     marginBottom: 20,
