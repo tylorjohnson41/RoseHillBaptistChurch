@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import EventsScreen from '../screens/EventsScreen';
 import BibleScreen from '../screens/BibleScreen';
 import SermonsScreen from '../screens/SermonsScreen';
+import GivingScreen from '../screens/GivingScreen';
 import MoreScreen from '../screens/MoreScreen';
 
 const Tab = createBottomTabNavigator();
@@ -41,12 +42,14 @@ export default function AppNavigator() {
               case 'Bible':
                 iconName = 'book-outline';
                 break;
-              case 'Sermons':
+              case 'Watch':
                 iconName = 'play-circle-outline';
                 break;
               case 'More':
                 iconName = 'menu-outline';
                 break;
+                case 'Give':
+                iconName = 'heart-outline';
             }
             return <Ionicons name={iconName} size={24} color={color} />;
           },
@@ -59,8 +62,9 @@ export default function AppNavigator() {
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Events" component={EventsScreen} />
         <Tab.Screen name="Bible" component={BibleScreen} />
-        <Tab.Screen name="Sermons" component={SermonsScreen} />
-        <Tab.Screen name="More" component={MoreScreen} />
+        <Tab.Screen name="Watch" component={SermonsScreen} />
+        <Tab.Screen name="Give" component={GivingScreen} />
+        <Tab.Screen name="More"component={MoreScreen}/>
       </Tab.Navigator>
     </NavigationContainer>
   );
