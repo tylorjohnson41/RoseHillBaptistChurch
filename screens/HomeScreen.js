@@ -9,37 +9,50 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 export default function HomeScreen({ navigation }) {
-  const [avatarURL, setAvatarURL] = React.useState(null);
+  const [avatarURL, setAvatarURL] = useState(null);
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (user) {
-        const {data: {user} } = await supabase
-        .from('profiles')
-        .select('avatar_url')
-        .eq('id, user.id')
-        .single();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-        if (data?.avatar_url) {
-          setAvatarURL(data.avatar_url);
-      }
-        console.error('Error fetching user:', error);
+      if (authError) {
+        console.error('Auth error:', authError.message);
         return;
       }
-      if (data.user) {
-        const { user_metadata } = data.user;
-        if (user_metadata && user_metadata.avatar_url) {
-          setAvatarURL(user_metadata.avatar_url);
-        }
+
+      if (!user) {
+        console.warn('No authenticated user found');
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError.message);
+        return;
+      }
+
+      if (profile?.avatar_url) {
+        setAvatarURL(profile.avatar_url);
       }
     };
 
-    fetchProfile();
-  }, []);
+    fetchUser();
+  }, []);  
+
+
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0D2B45' }}>
       <ScrollView contentContainerStyle={styles.container}>
