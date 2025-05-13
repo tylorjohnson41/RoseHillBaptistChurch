@@ -3,147 +3,191 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
-  TextInput,
   ScrollView,
+  TextInput,
+  TouchableOpacity,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-const sampleVerses = [
-  {
-    reference: 'John 3:16',
-    text: 'For God so loved the world that he gave his one and only Son...',
+const books = {
+  Genesis: {
+    chapters: {
+      1: [
+        'In the beginning God created the heavens and the earth.',
+        'Now the earth was formless and empty, darkness was over the surface of the deep...',
+        'And God said, “Let there be light,” and there was light.',
+      ],
+    },
   },
-  {
-    reference: 'Psalm 23:1',
-    text: 'The Lord is my shepherd, I shall not want.',
+  Matthew: {
+    chapters: {
+      1: [
+        'This is the genealogy of Jesus the Messiah the son of David, the son of Abraham...',
+        'Abraham was the father of Isaac, Isaac the father of Jacob...',
+      ],
+    },
   },
-  {
-    reference: 'Philippians 4:13',
-    text: 'I can do all things through Christ who strengthens me.',
-  },
-  {
-    reference: 'Romans 8:28',
-    text: 'And we know that all things work together for good to those who love God...',
-  },
-];
+};
 
 const BibleScreen = () => {
-  const [searchText, setSearchText] = useState('');
+  const [search, setSearch] = useState('');
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedChapter, setSelectedChapter] = useState(null);
+  const [expandedVerses, setExpandedVerses] = useState({});
+
+  const handleVerseToggle = (index) => {
+    setExpandedVerses((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
+  const renderVerseOfDay = () => (
+    <View style={styles.verseBox}>
+      <Text style={styles.verseTitle}>
+        <Ionicons name="sparkles" size={16} /> Verse of the Day
+      </Text>
+      <Text style={styles.verseText}>
+        "Your word is a lamp to my feet and a light to my path." - Psalm 119:105
+      </Text>
+    </View>
+  );
+
+  const renderBookSelector = () => (
+    <View style={{ marginBottom: 20 }}>
+      <Text style={styles.sectionTitle}>Browse by Book</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {Object.keys(books).map((book) => (
+          <TouchableOpacity
+            key={book}
+            style={[styles.bookButton, selectedBook === book && styles.bookButtonActive]}
+            onPress={() => {
+              setSelectedBook(book);
+              setSelectedChapter(null);
+            }}
+          >
+            <Text style={[styles.bookText, selectedBook === book && styles.bookTextActive]}>{book}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
+  const renderChapterSelector = () => {
+    if (!selectedBook) return null;
+    const chapters = Object.keys(books[selectedBook].chapters);
+    return (
+      <View style={{ marginBottom: 20 }}>
+        <Text style={styles.sectionTitle}>Chapters in {selectedBook}</Text>
+        <View style={styles.chapterRow}>
+          {chapters.map((ch) => (
+            <TouchableOpacity
+              key={ch}
+              style={[styles.chapterButton, selectedChapter == ch && styles.chapterButtonActive]}
+              onPress={() => setSelectedChapter(ch)}
+            >
+              <Text style={styles.chapterText}>{ch}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  const renderScripture = () => {
+    if (!selectedBook || !selectedChapter) return null;
+    const verses = books[selectedBook].chapters[selectedChapter];
+    return (
+      <View style={{ marginBottom: 30 }}>
+        <Text style={styles.sectionTitle}>{selectedBook} {selectedChapter}</Text>
+        {verses.map((verse, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.verseCard}
+            onPress={() => handleVerseToggle(index)}
+          >
+            <Text style={styles.verseNumber}>Verse {index + 1}</Text>
+            <Text style={styles.verseContent}>
+              {expandedVerses[index] ? verse : verse.slice(0, 60) + '...'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
 
   return (
-    <LinearGradient colors={['#0D1B2A', '#1B263B']} style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Title */}
-          <Text style={styles.title}>Bible</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0A0F24' }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.header}>Bible</Text>
+        {renderVerseOfDay()}
 
-          {/* Verse of the Day */}
-          <View style={styles.card}>
-            <Ionicons name="sparkles-outline" size={20} color="#fff" style={styles.cardIcon} />
-            <View>
-              <Text style={styles.cardTitle}>Verse of the Day</Text>
-              <Text style={styles.cardText}>
-                "Your word is a lamp to my feet and a light to my path." - Psalm 119:105
-              </Text>
-            </View>
-          </View>
+        <TextInput
+          placeholder="Search a verse (e.g. John 3:16)"
+          placeholderTextColor="#aaa"
+          style={styles.searchBar}
+          value={search}
+          onChangeText={setSearch}
+        />
 
-          {/* Search Bar */}
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={20} color="#ccc" style={{ marginRight: 8 }} />
-            <TextInput
-              placeholder="Search a verse (e.g. John 3:16)"
-              placeholderTextColor="#aaa"
-              value={searchText}
-              onChangeText={setSearchText}
-              style={styles.searchInput}
-            />
-          </View>
-
-          {/* Sample Verses */}
-          {sampleVerses.map((verse, index) => (
-            <View key={index} style={styles.verseCard}>
-              <Text style={styles.verseRef}>{verse.reference}</Text>
-              <Text style={styles.verseText}>{verse.text}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      </SafeAreaView>
-    </LinearGradient>
+        {renderBookSelector()}
+        {renderChapterSelector()}
+        {renderScripture()}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: '#1E2A38',
-    borderRadius: 16,
+  container: { padding: 16 },
+  header: { fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 20, textAlign: 'center' },
+  verseBox: {
+    backgroundColor: '#1C223C',
     padding: 16,
-    marginBottom: 20,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    elevation: 4,
-  },
-  cardIcon: {
-    marginRight: 12,
-    marginTop: 4,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-    marginBottom: 6,
-  },
-  cardText: {
-    fontSize: 14,
-    color: '#ccc',
-  },
-  searchBar: {
-    flexDirection: 'row',
-    backgroundColor: '#1E2A38',
     borderRadius: 12,
-    padding: 12,
-    alignItems: 'center',
     marginBottom: 20,
   },
-  searchInput: {
+  verseTitle: { fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 8 },
+  verseText: { color: '#ccc', fontStyle: 'italic' },
+  searchBar: {
+    backgroundColor: '#1C223C',
+    padding: 12,
+    borderRadius: 10,
     color: '#fff',
-    flex: 1,
-    fontSize: 14,
+    marginBottom: 20,
   },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 10 },
+  bookButton: {
+    backgroundColor: '#1C223C',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  bookButtonActive: {
+    backgroundColor: '#4263EB',
+  },
+  bookText: { color: '#ccc' },
+  bookTextActive: { color: '#fff', fontWeight: '600' },
+  chapterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chapterButton: {
+    backgroundColor: '#1C223C',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  chapterButtonActive: { backgroundColor: '#4263EB' },
+  chapterText: { color: '#fff' },
   verseCard: {
-    backgroundColor: '#1E2A38',
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: '#1C223C',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 10,
   },
-  verseRef: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-    marginBottom: 6,
-  },
-  verseText: {
-    fontSize: 13,
-    color: '#ccc',
-  },
+  verseNumber: { color: '#9baaf7', fontWeight: '600', marginBottom: 4 },
+  verseContent: { color: '#eee' },
 });
 
 export default BibleScreen;
